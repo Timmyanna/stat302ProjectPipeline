@@ -1,0 +1,89 @@
+---
+title: "stat302Package Tutorial"
+author: "Luoan Tang"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{stat302Package Tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r}
+load("../Data/my_penguins.rda")
+source("../Code/my_rf_cv.R")
+library(dplyr)
+library(ggplot2)
+```
+### Tutorial for `my_rf_cv`
+
+Lastly, I will demonstrate how my 'my_rf_cv` works by predicting body_mass_g using covariates bill_length_mm, bill_depth_mm, and flipper_length_mm.
+
+```{r}
+# choose k = 2 and run 30 times
+cv_error_2 <- c()
+for (t in 1:30) {
+  result <- my_rf_cv(2)
+  cv_error_2 <- append(cv_error_2, result)
+}
+
+# choose k = 5 and run 30 times
+cv_error_5 <- c()
+for (t in 1:30) {
+  result <- my_rf_cv(5)
+  cv_error_5 <- append(cv_error_5, result)
+}
+
+# choose k = 10 and run 30 times
+cv_error_10 <- c()
+for (t in 1:30) {
+  result <- my_rf_cv(10)
+  cv_error_10 <- append(cv_error_10, result)
+}
+
+my_df <- data.frame(k = factor(rep(c("k = 2","k = 5", "k = 10"), each = 30)), cv_errors = c(cv_error_2, cv_error_5, cv_error_10))
+
+p <- ggplot(my_df, aes(x = k, y = cv_errors)) + geom_boxplot()
+p
+
+#create a table for mean and standard deviation of every groups of cv errors
+cv_table <- matrix(c(mean(cv_error_2), sd(cv_error_2), mean(cv_error_5), sd(cv_error_5), mean(cv_error_10), sd(cv_error_10)), ncol=2, byrow=TRUE)
+
+rownames(cv_table) <- c("k = 2","k = 5","k = 10")
+colnames(cv_table) <- c("mean","sd")
+cv_table <- as.table(cv_table)
+cv_table
+
+ggsave("fig.png", plot = p, path = "../Output/Figures")
+
+my_sim <- data.frame(cv_error_2, cv_error_5, cv_error_10)
+colnames(my_sim) = c("k = 2", "k = 5", "k = 10")
+saveRDS(cv_table, file = "../Output/Results/cv_table.rds")
+#store simulation results
+write.csv(my_sim, file = "../Output/Results/sim.csv")
+```
+
+From the table, I found that k = 2 has both highest mean and variance of cv error. k = 5 and k = 10 has similar mean of cv error, while k = 5 is higher in standard deviation. 
+From the box plot, I found k = 2 has largest box and median, which match thr result from table. k = 5 and k = 10 has similar box position and size, while k = 10 is denser than k = 5 and has lower median of cv errors.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
