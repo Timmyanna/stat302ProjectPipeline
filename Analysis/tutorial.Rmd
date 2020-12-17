@@ -60,12 +60,15 @@ colnames(cv_table) <- c("mean","sd")
 cv_table <- as.table(cv_table)
 cv_table
 
+# store the ggplot into an png file
 ggsave("fig.png", plot = p, path = "../Output/Figures")
 
+# record my simulations
 my_sim <- data.frame(cv_error_2, cv_error_5, cv_error_10)
 colnames(my_sim) = c("k = 2", "k = 5", "k = 10")
+# save my result table
 save(cv_table, file = "../Output/Results/cv_table.rds")
-#store simulation results
+# save simulation results
 write.csv(my_sim, file = "../Output/Results/sim.csv")
 ```
 
